@@ -4,13 +4,14 @@ int clockPin = 12;
 int dataPin = 11;
 
 //Sorties du register 4094
-int tab[] = {0,8,4,2,1};
-//int tab1[] = {2,2,2,2,2};
+int tab[] = {1,2,4};
 
 //Bouton Poussoir
 int bpPin = 2;
+int bpInverse = 3;
 
-int score = 0;
+int score1 = 0;
+int score2 = 1;     
 
 void setup() {
   //set pins to output because they are addressed in the main loop
@@ -20,7 +21,15 @@ void setup() {
 
   //set BP
   pinMode(bpPin, INPUT);
+  pinMode(bpInverse, INPUT);
+
+  digitalWrite(latchPin, LOW);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0);
+  shiftOut(dataPin, clockPin, MSBFIRST, 0);     
+  digitalWrite(latchPin, HIGH);
 }
+
+     
 
 void loop() {
 
@@ -29,22 +38,63 @@ void loop() {
 
   //lecture du bouton poussoir
   boolean bp = digitalRead(bpPin);
+  boolean inverser = digitalRead(bpInverse);
 
     if(bp) {
       while(digitalRead(bpPin)){
         delay(10);
       }
-      score++;
+      score1++;
+      score2++;
+      if(score1 == 4) score1 = 1;
+      if(score2 == 4) score2 = 1;
       digitalWrite(latchPin, LOW);
-      shiftOut(dataPin, clockPin, MSBFIRST, tab[score]);
+      shiftOut(dataPin, clockPin, MSBFIRST, tab[score2-1]);       
+      shiftOut(dataPin, clockPin, MSBFIRST, tab[score1-1]); 
+          
       //shiftOut(dataPin, clockPin, MSBFIRST, tab1[j]);
       //return the latch pin high to signal chip that it
       //no longer needs to listen for information
       digitalWrite(latchPin, HIGH);
-      Serial.println(score);
-      if(score == 4) score = 0;
+      Serial.print("score 1 = ");
+      Serial.print(score1);
+      Serial.println();
+      Serial.print("score 2 = ");
+      Serial.print(score2);
+     
+    }   
+    
+
+    if(inverser) {
+      while(digitalRead(bpInverse)){
+        delay(10);}
+      int tmp = score1;
+      score1 = score2;
+      score2 = tmp;
+      //inverser(score1, score2);
+      digitalWrite(latchPin, LOW);
+      shiftOut(dataPin, clockPin, MSBFIRST, tab[score2-1]);
+      shiftOut(dataPin, clockPin, MSBFIRST, tab[score1-1]);      
+      //shiftOut(dataPin, clockPin, MSBFIRST, tab1[j]);
+      //return the latch pin high to signal chip that it
+      //no longer needs to listen for information
+      digitalWrite(latchPin, HIGH);
+       Serial.print("score 1 = ");
+      Serial.print(score1);
+      Serial.println();
+      Serial.print("score 2 = ");
+      Serial.print(score2);
     }
+
+      
 
   
   delay(100);
 }
+
+//void inverser(int* score1, int* score2) {
+//  int tmp = *score1;
+//  *score1 = *score2;
+//  *score2 = tmp;
+//}
+
